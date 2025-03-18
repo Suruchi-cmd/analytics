@@ -125,7 +125,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000","https://analytics-frontend-nine.vercel.app"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000","https://analytics-frontend-nine.vercel.app","analytics-frontend-git-main-suruchis-projects-01f7ec53.vercel.app"]
 # CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ALLOW_CREDENTIALS = True
 
