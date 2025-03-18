@@ -1,0 +1,165 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  Container,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Select,
+  MenuItem,
+  Paper,
+  Button,
+  Box,
+} from "@mui/material";
+
+interface ZohoRecord {
+  [key: string]: any; // Dynamic key-value pairs
+}
+
+const App = () => {
+  const [data, setData] = useState<ZohoRecord[]>([]);
+  const [salesAgentFilter, setSalesAgentFilter] = useState("");
+  const [financialStatus, setFinancialStatus] = useState("");
+
+  useEffect(() => {
+    axios
+      .get("http://127.0.0.1:8000/fetch-zoho/")
+      .then((response) => setData(response.data.data))
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
+
+  // Filtered data based on Sales Agent selection
+  const filteredData = data.filter(
+    (row) =>
+      (salesAgentFilter ? row["Sales Agent"] === salesAgentFilter : true) &&
+      (financialStatus ? row["Financial Status."] === financialStatus : true)
+  );
+
+  // Extract unique sales agents for filtering dropdown
+  const salesAgents = Array.from(
+    new Set(data.map((row) => row["Sales Agent"]))
+  ).filter(Boolean);
+
+  const jobFinancialStatus = Array.from(
+    new Set(data.map((row) => row["Financial Status."]))
+  ).filter(Boolean);
+
+  return (
+    <Container maxWidth={false}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Box>
+          <Button variant="contained" color="primary" sx={{ marginRight: 2 }}>
+            Refresh Data
+          </Button>
+          <Button variant="contained" color="primary">
+            Export Data
+          </Button>
+        </Box>
+        <Box display="flex" gap={2}>
+          <Select
+            value={salesAgentFilter}
+            onChange={(e) => setSalesAgentFilter(e.target.value)}
+            displayEmpty
+            sx={{ minWidth: 200 }}
+          >
+            <MenuItem value="">All Sales Agents</MenuItem>
+            {salesAgents.map((agent) => (
+              <MenuItem key={agent} value={agent}>
+                {agent}
+              </MenuItem>
+            ))}
+          </Select>
+
+          <Select
+            value={financialStatus}
+            onChange={(e) => setFinancialStatus(e.target.value)}
+            displayEmpty
+            sx={{ minWidth: 200 }}
+          >
+            <MenuItem value="">All Financial Status</MenuItem>
+            {jobFinancialStatus.map((status) => (
+              <MenuItem key={status} value={status}>
+                {status}
+              </MenuItem>
+            ))}
+          </Select>
+        </Box>
+      </Box>
+
+      <TableContainer
+        component={Paper}
+        sx={{ overflowX: "auto", maxHeight: "calc(100vh - 100px)" }}
+      >
+        <Table stickyHeader size="small">
+          <TableHead>
+            <TableRow sx={{ height: "40px" }}>
+              {data.length > 0 &&
+                Object.keys(data[0]).map((key, idx) => (
+                  <TableCell
+                    key={key}
+                    sx={{
+                      minWidth: "120px",
+                      padding: "6px 16px",
+
+                      left:
+                        idx === 0
+                          ? 0
+                          : idx === 1
+                          ? 120
+                          : idx === 2
+                          ? 240
+                          : undefined,
+                      zIndex: idx < 3 ? 100 : undefined,
+                      background: "white",
+                    }}
+                  >
+                    {key}
+                  </TableCell>
+                ))}
+              <TableCell>Payment to Agent</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredData.map((row, index) => (
+              <TableRow key={index} hover>
+                {Object.values(row).map((value, i) => (
+                  <TableCell
+                    key={i}
+                    sx={{
+                      minWidth: "120px",
+                      position: i < 3 ? "sticky" : "static",
+                      left:
+                        i === 0 ? 0 : i === 1 ? 120 : i === 2 ? 240 : undefined,
+                      zIndex: i < 3 ? 50 : undefined,
+                      background: "white",
+                    }}
+                  >
+                    {String(value)}
+                  </TableCell>
+                ))}
+                <TableCell>
+                  <Select defaultValue=" " size="small">
+                    <MenuItem value="Paid">Paid</MenuItem>
+                    <MenuItem value="Not Paid">Not Paid</MenuItem>
+                    <MenuItem value="Carry Forward">Carry Forward</MenuItem>
+                  </Select>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Container>
+  );
+};
+
+export default App;
