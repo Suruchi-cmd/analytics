@@ -24,7 +24,8 @@ const App = () => {
   const [data, setData] = useState<ZohoRecord[]>([]);
   const [salesAgentFilter, setSalesAgentFilter] = useState("");
   const [financialStatus, setFinancialStatus] = useState("");
-  const [installedDateFilter, setInstalledDateFilter] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     axios
@@ -34,16 +35,29 @@ const App = () => {
   }, []);
 
   const filteredData = data
-    .filter(
-      (row) =>
+    .filter((row) => {
+      const installedDate = row["Installed Date"]
+        ? new Date(row["Installed Date"])
+        : null;
+
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+
+      const isInDateRange =
+        installedDate &&
+        (!start || installedDate >= start) &&
+        (!end || installedDate <= end);
+
+      return (
         (salesAgentFilter ? row["Sales Agent"] === salesAgentFilter : true) &&
         (financialStatus
           ? row["Financial Status."] === financialStatus
           : true) &&
-        (installedDateFilter
-          ? row["Installed Date"] === installedDateFilter
-          : true)
-    )
+        (!startDate && !endDate
+          ? true
+          : isInDateRange || !row["Installed Date"])
+      );
+    })
     .sort((a, b) => {
       if (!a["Installed Date"] && b["Installed Date"]) return -1;
       if (a["Installed Date"] && !b["Installed Date"]) return 1;
@@ -100,11 +114,20 @@ const App = () => {
               </MenuItem>
             ))}
           </Select>
+
+          {/* Date Range Filters */}
           <TextField
-            label="Installed Date"
+            label="Start Date"
             type="date"
-            value={installedDateFilter}
-            onChange={(e) => setInstalledDateFilter(e.target.value)}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="End Date"
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
           />
         </Box>
