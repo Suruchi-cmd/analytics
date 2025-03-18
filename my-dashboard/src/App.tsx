@@ -27,7 +27,7 @@ const App = () => {
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/fetch-zoho/")
+      .get("https://analytics-tau-nine.vercel.app/fetch-zoho/")
       .then((response) => setData(response.data.data))
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
